@@ -1,13 +1,9 @@
 import React from 'react'
 import { View, StyleSheet, Dimensions, Text } from 'react-native'
-import { RowProps } from './Row'
 import { colors } from './Board'
 
-interface SquareProps extends RowProps {
-    col: number;
-}
 
-const Square = ({ row, col }: SquareProps) => {
+const Square = ({ row, col }) => {
     const offset: any = row % 2 === 0 ? 1 : 0;
     const backgroundColor = (col + offset) % 2 === 0 ? colors.black : colors.white;
     return (

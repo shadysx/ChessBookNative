@@ -7,9 +7,6 @@ const ChessboardView = () => {
     <View style={styles.container}>
       <Text>ChessboardView</Text>
       <Board/>
-      <Button 
-        title="test" 
-      />
     </View>
   )
 }
