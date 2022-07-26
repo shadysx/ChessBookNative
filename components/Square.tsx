@@ -1,7 +1,10 @@
 import React from 'react'
 import { View, StyleSheet, Dimensions, Text } from 'react-native'
-import { colors } from './Board'
 
+export const colors = {
+    black: "rgb(58, 176, 255)",
+    white: "rgb(230, 233, 230)",
+}
 
 const Square = ({ row, col }) => {
     const offset: any = row % 2 === 0 ? 1 : 0;
