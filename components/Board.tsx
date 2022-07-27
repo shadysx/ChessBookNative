@@ -45,9 +45,9 @@ const Board = () => {
 
             }
             //Check if my first target is null, if yes just return
-            if(board[pieceIndex[1]][pieceIndex[0]] == null) { 
-                return
-            }
+            // if(board[pieceIndex[1]][pieceIndex[0]] == null) { 
+            //     return
+            // }
             
             //Control if not clicking again on the same piece
             else if (piecePosition != pieceStartPosition){
@@ -105,7 +105,14 @@ const Board = () => {
             switch(pieceType){
                 case 'p' :
                     console.log("Its a pawn")
-                    move = pieceEndPosition
+                    //En passant
+                    if(pieceStartPosition[0] != pieceEndPosition[0]){
+                        move = pieceStartPosition[0] + "x" + pieceEndPosition
+                    }
+                    //Normal takes
+                    else {
+                        move = pieceEndPosition
+                    }
                     break
                 case 'n' :
                     console.log("Its a knight")
@@ -160,7 +167,7 @@ const Board = () => {
             }
         }
         
-        console.log(move)
+        console.log("Move input: ", move)
         chess.move(move)   
         setBoard(chess.board())
     }
@@ -192,7 +199,7 @@ const Board = () => {
 
         console.log("list of legal moves")
         moves.map(move => {
-            if(move.slice(-1) == "+") {
+            if(move.slice(-1) == "+" || move.slice(-1) == "#") {
                 
                 legalMoves.push(move.slice(0, -1).slice(-2))
             }
