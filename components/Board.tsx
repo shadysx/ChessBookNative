@@ -17,70 +17,152 @@ const Board = () => {
     const [legalMoves, setLegalMoves] = useState(["00"])
     const [isMoving, setIsMoving] = useState(false)
     const [pieceStartPosition, setPieceStartPosition] = useState("")
+    const [pieceType, setPieceType] = useState("")
     const [pieceEndPosition, setPieceEndPosition] = useState("")
     const [update, setUpdated] = useState(false)
 
     //Be aware that index XY axis are supposed to be in this order, but when we use Board[Y][X]
     const HandleMove = (pieceIndex) => {
         console.log("--------------")
-        let pieceType = GetPieceType(pieceIndex)
         let piecePosition = convertIndexToPos(pieceIndex)
 
-            console.log(`Piece Index (XY): ${pieceIndex}\nPosition: ${piecePosition}`)
         
 
                 
             if (isMoving) {
+                CheckIfTake(pieceIndex) 
                 if(legalMoves.includes(piecePosition)){
-                    PlayMove(piecePosition)
+                    PlayMove(piecePosition, pieceType)
                     setIsMoving(false)
-                    console.log("1")
+                    console.log("Went through -> 1")
+                    console.log(`To: ${piecePosition}, From: ${pieceStartPosition}`)
                 }
 
                     setIsMoving(false)
                     setLegalMoves([])
-                    setMovingPiecePosition("")
-                    console.log("2")
+                    setPieceStartPosition("")
+                    console.log("Went through -> 2")
 
             }
             //Check if my first target is null, if yes just return
             if(board[pieceIndex[1]][pieceIndex[0]] == null) { 
-                console.log("Target is null")
-                console.log(board[pieceIndex[0][pieceIndex[1]]])
                 return
             }
             
             //Control if not clicking again on the same piece
-            else if (piecePosition != movingPiecePosition){
+            else if (piecePosition != pieceStartPosition){
+                console.log(`(Starting) Piece Index (XY): ${pieceIndex} Position: ${piecePosition}`)
                 if(board[pieceIndex[1]][pieceIndex[0]] == null) { 
-                    setMovingPiecePosition("")
+                    setPieceStartPosition("")
                     RefreshLegalMoves([])
                     setIsMoving(false)
-                    console.log("3")
+                    console.log("Went through -> 3")
                 }
                 //If != null means that the piece want to go on a empty cell wich is good 
                 else {
-                    setMovingPiecePosition(piecePosition)
+                    setPieceStartPosition(piecePosition)
                     RefreshLegalMoves(piecePosition)
                     setIsMoving(true)
-                    console.log("4")
+                    setPieceType(GetPieceType(pieceIndex))
+                    console.log("Went through -> 4")
                 }
 
             }
-            //Control if click again on the same piece
-            else if (piecePosition == movingPiecePosition ){
-                setMovingPiecePosition("")
-                setLegalMoves([])
-                setIsMoving(false)
-                console.log("5")
-            }
+            
+            // //Control if click again on the same piece
+            // else if (piecePosition == movingPiecePosition ){
+            //     setMovingPiecePosition("")
+            //     setLegalMoves([])
+            //     setIsMoving(false)
+            //     console.log("5")
+            // }
             
     }
 
-    const PlayMove = (pieceEndPosition) => {
-        chess.move(pieceEndPosition)   
+    const CheckIfTake = (pieceIndex) => {
+        let x = parseInt(pieceIndex[0])
+        let y = parseInt(pieceIndex[1]) 
+        let isTaking = false
+
+        board.map((row, j) => {
+            row.map((square, i) => {
+                if(j == y && i == x && square != null) {
+                    isTaking = true
+                }
+            })
+        })
+        return isTaking
+    }
+
+    const PlayMove = (pieceEndPosition, pieceType) => {
+        let pieceEndIndex = convertPosToIndex(pieceEndPosition)
+        let isTaking = CheckIfTake(pieceEndIndex)
+        let move = ""
+        console.log("IsTaking? ", isTaking)
+
+        //Not taking
+        if (!isTaking) {
+            switch(pieceType){
+                case 'p' :
+                    console.log("Its a pawn")
+                    move = pieceEndPosition
+                    break
+                case 'n' :
+                    console.log("Its a knight")
+                    move = "N" + pieceEndPosition
+                    break
+                case 'b' :
+                    console.log("Its a bishop")
+                    move = "B" + pieceEndPosition
+                    break
+                case 'r' :
+                    console.log("Its a Rook")
+                    move = "R" + pieceEndPosition
+                    break
+                case 'q' :
+                    console.log("Its a Queen")
+                    move = "Q" + pieceEndPosition
+                    break
+                case 'k' :
+                    console.log("Its a King")
+                    move = "K" + pieceEndPosition
+                    break
+            } 
+
+        }
+        //Taking
+        else if(isTaking){
+            switch(pieceType){
+                case 'p' :
+                    console.log("Its a pawn")
+                    move =  pieceStartPosition[0] + "x" + pieceEndPosition
+                    break
+                case 'n' :
+                    console.log("Its a knight")
+                    move = "N" + "x" + pieceEndPosition
+                    break
+                case 'b' :
+                    console.log("Its a bishop")
+                    move = "B" + "x" + pieceEndPosition
+                    break
+                case 'r' :
+                    console.log("Its a Rook")
+                    move = "R" + "x" + pieceEndPosition
+                    break
+                case 'q' :
+                    console.log("Its a Queen")
+                    move = "Q" + "x" + pieceEndPosition
+                    break
+                case 'k' :
+                    console.log("Its a King")
+                    move = "K" + "x" + pieceEndPosition
+                    break
+            }
+        }
+        
+        console.log(move)
+        chess.move(move)   
         setBoard(chess.board())
-        console.log(chess.ascii())
     }
 
 
@@ -90,7 +172,6 @@ const Board = () => {
         setBoard(chess.board())
         setLegalMoves([])
         setMovingPiecePosition("")
-        console.log(chess.ascii())
     }
 
     const GetPieceType = (index: string) : string => {
@@ -107,13 +188,22 @@ const Board = () => {
 
     const RefreshLegalMoves = (piecePosition) => {
         let moves = chess.moves({square: piecePosition})
-        let temp = []
+        let legalMoves = []
 
+        console.log("list of legal moves")
         moves.map(move => {
-            temp.push(move)
+            if(move.slice(-1) == "+") {
+                
+                legalMoves.push(move.slice(0, -1).slice(-2))
+            }
+            else {
+                legalMoves.push(move.slice(-2))
+            }
+
+            console.log(move)
         })
 
-        setLegalMoves([...temp])
+        setLegalMoves([...legalMoves])
 
     }
 
@@ -178,7 +268,10 @@ const Board = () => {
           }
     }
 
-    useEffect(() => {})
+    useEffect(() => {
+        //console.log('Legal Moves', legalMoves)
+        console.log(pieceType)
+    })
     
 
   return (
@@ -195,12 +288,12 @@ const Board = () => {
                                             <Piece 
                                                 square={square.square}
                                                 key={`${y}${x}${square.color}${square.type}`} 
-                                                movingPiece={movingPiecePosition}
+                                                movingPiece={pieceStartPosition}
                                                 x={x} 
                                                 y={y} 
                                                 type={`${square.color}${square.type}`}/>
                                         }
-                                        {<View style={[styles.layout, {top: pieceSize * y, left: pieceSize * x, backgroundColor: movingPiecePosition == `${y}${x}` ? 'lightblue' : 'transparent' }]}></View>}
+                                        {/*Legal Moves Layout */} 
                                         {<View style={[styles.layout, {top: pieceSize * y, left: pieceSize * x, backgroundColor: showLegalMoves(x, y) ? 'lightblue' : 'transparent' }]}></View>}
                                     </TouchableOpacity>
                                 </View>
